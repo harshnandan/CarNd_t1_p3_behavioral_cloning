@@ -41,28 +41,22 @@ def generator(samples, batch_size=32):
 train_generator = generator(train_samples, batch_size=32)
 validation_generator = generator(validation_samples, batch_size=32)
 
-a = (next(train_generator))
-print(len(a))
-
-ch, row, col = 3, 160, 320  # Trimmed image format
-
 from keras.models import Sequential
 from keras.layers import Flatten, Dense
 from keras.layers import Conv2D, Lambda
 
 model = Sequential()
 # Preprocess incoming data, centered around zero with small standard deviation 
-model.add(Lambda(lambda x: x/127.5 - 1.,
-        input_shape=(row, col, ch)))
-model.add(Conv2D(36, 5, 5, activation=None))
-model.add(Conv2D(48, 3, 3, activation=None))
-model.add(Conv2D(64, 3, 3, activation=None))
+model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=(160, 320, 3)))
+#model.add(Conv2D(36, (5, 5), activation=None))
+#model.add(Conv2D(48, (3, 3), activation=None))
+#model.add(Conv2D(64, (3, 3), activation=None))
 model.add(Flatten( ))
 model.add(Dense(50))
 model.add(Dense(1))
 
 model.compile(loss='mse', optimizer='adam')
-model.fit_generator(train_generator, samples_per_epoch= 
-            len(train_samples), validation_data=validation_generator, 
-            nb_val_samples=len(validation_samples), nb_epoch=3)
+#
+model.fit_generator(train_generator, steps_per_epoch= len(train_samples),
+validation_data=validation_generator, validation_steps=len(validation_samples), epochs=5, verbose = 1)
 
