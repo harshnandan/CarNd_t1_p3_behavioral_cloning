@@ -1,11 +1,18 @@
-# **Behavioral Cloning** 
+# **Udacity Self-Driving Car Engineer Nanodegree - Behavioral Cloning Project** 
 
 ---
 
-**Behavioral Cloning Project**
+**Introduction**
 
-The goals / steps of this project are the following:
-* Use the simulator to collect data of good driving behavior
+The objective of this project is to use deep learning techniques to effectively teach a car autonomously in a simulated environment. For the purpose of this project, Udacity provided a simulator capable of operating in both autonomous and training mode. Although the simulator had two tracks, this project has been tested on the test track. The "challenge-track" will be tested in a follow-up effort.
+
+The first step of teaching a deep neural network to drive is to collect a lot of rich data. The data is collected by running the simulator in training mode and using mouse and arrow keys to drive the car. The simulator captures steering angle, throttle, brake, speed and dashboard camera images and stores it in an organized fashion for further use. This data should cover key aspects of driving like making left and right turns, recovering from the side of the road etc. 
+
+After appropriate inspection of data and required augmentation, the data is used to train a CNN network built using Keras. The trained model is saved as a .h5 file. This file is then used by drive.py file drive the car autonomously in the simulation environment.
+
+The goals/steps of this project are the following:
+* Use the simulator to collect data on good driving behavior
+* Analyze the recorded data and decide on how to augment the data
 * Build, a convolution neural network in Keras that predicts steering angles from images
 * Train and validate the model with a training and validation set
 * Test that the model successfully drives around track one without leaving the road
@@ -15,16 +22,21 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: ./img/training_movie.gif "Model Visualization"
-[image2]: ./img/left_center_right_recorded_data.png "Grayscaling"
-[image3]: ./img/steeringAngle_Distribution.png "Recovery Image"
-[image4]: ./img/horizontally_flipped_image.png "Recovery Image"
-[image5]: ./img/brightness_adjusted.png "Recovery Image"
-[image6]: ./img/keras_cropped_image.png "Normal Image"
+[image2]: ./img/left_center_right_recorded_data.png "Perspective from 3 vantage points"
+[image3]: ./img/steeringAngle_Distribution.png "Spread of Steering angles"
+[image4]: ./img/horizontally_flipped_image.png "Flipping the image"
+[image5]: ./img/brightness_adjusted.png "Minor adjustments to brightness"
+[image6]: ./img/keras_cropped_image.png "Image cropping using Keras"
 [image6]: ./img/autonomousDriving.gif "Autonomous Driving"
 
-## Rubric Points
-### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
+## Approach
+### Data Collection
 
+### Data Analysis and Augmentation
+
+### Architecture of Deployed CNN and Training
+
+### Autonomous Driving
 ---
 ### Files Submitted & Code Quality
 
