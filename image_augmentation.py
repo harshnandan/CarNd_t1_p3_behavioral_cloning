@@ -6,9 +6,17 @@ import imageio
 from random import shuffle
 
 # plot histogram of steering angles
-def showDrivingAngles(samples, title="recorded training samples"):
+def showDrivingAngles(samples, aug='original', title="recorded training samples"):
     # each image is mirror imaged by default to create the augmented dataset
-    lst = [float(sample[3]) for sample in samples ] + [-1*float(sample[3]) for sample in samples ]
+    if aug=='reflect':
+        lst = [float(sample[3]) for sample in samples ] + [-1*float(sample[3]) for sample in samples ]
+    elif aug == 'left_right':
+        lst = [float(sample[3]) for sample in samples ] + [float(sample[3])+0.2 for sample in samples ] + [float(sample[3])-0.2 for sample in samples ] 
+    elif aug == 'original':
+        lst = [float(sample[3]) for sample in samples ] 
+    elif aug == 'left_right_reflect':
+        lst_1 = [float(sample[3]) for sample in samples ] + [float(sample[3])+0.2 for sample in samples ] + [float(sample[3])-0.2 for sample in samples ]
+        lst = [float(ls) for ls in lst_1 ] + [-1*float(ls) for ls in lst_1]
     # use 64 bins
     plt.hist(lst, 64)
     plt.title("Steering angle distribution in " + title)
@@ -50,10 +58,12 @@ if 0:
 
 # Plots stats of training steering angle           
 plt.figure(figsize=(12, 3))
-plt.subplot(1, 2, 1)
-showDrivingAngles(samples_original)
-plt.subplot(1, 2, 2)
-showDrivingAngles(samples, "augmented data set")
+plt.subplot(1, 3, 1)
+showDrivingAngles(samples_original, aug='original', title="\ndata set with center images only")
+plt.subplot(1, 3, 2)
+showDrivingAngles(samples_original, aug='left_right', title="\ndata set with left-right images")
+plt.subplot(1, 3, 3)
+showDrivingAngles(samples, aug='left_right_reflect', title="\ndata set with left-right images and flipped images")
 plt.show()
 
 # Exploration of image and steering angle data using a sample image    

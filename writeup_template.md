@@ -18,120 +18,96 @@ The goals/steps of this project are the following:
 * Test that the model successfully drives around track one without leaving the road
 * Summarize the results with a written report
 
+---
 
 [//]: # (Image References)
 
-[image1]: ./img/training_movie.gif "Model Visualization"
+[image1]: ./img/training_movie.gif "Training data"
 [image2]: ./img/left_center_right_recorded_data.png "Perspective from 3 vantage points"
 [image3]: ./img/steeringAngle_Distribution.png "Spread of Steering angles"
 [image4]: ./img/horizontally_flipped_image.png "Flipping the image"
-[image5]: ./img/brightness_adjusted.png "Minor adjustments to brightness"
+[image5]: ./img/brightness_adjusted.png "Random adjustments to brightness"
 [image6]: ./img/keras_cropped_image.png "Image cropping using Keras"
-[image6]: ./img/autonomousDriving.gif "Autonomous Driving"
+[image7]: ./img/autonomousDriving.gif "Autonomous Driving"
 
 ## Approach
 ### Data Collection
+The data was collected from 2 laps around the test track. In the first attempt the car was driven smoothly around the track. Due to reasons discussed below, it was evident that more varied driving behavior was required for good performance. Hence at places, the car was deliberately taken to the edge of the track and then was steered back to the center of the lane. This way a rich data set of appropriate driving behavior was collected.
 
-### Data Analysis and Augmentation
+![alt text][image1]
+![alt text][image2]
+---
 
 ### Architecture of Deployed CNN and Training
 
-### Autonomous Driving
----
-### Files Submitted & Code Quality
+#### 1. CNN architecture
+First few attempts were made with a very simple architecture of one convolution layer and one dense layer to confirm the flow of data and get a preliminary sense of performance. It was seen that this basic architecture had large training and validation error and hence it was immediately clear that the architecture will require many more trainable parameters. Nvidia's architecture was a good option to start with. It was observed that with the full 160x320x3 image the memory requirement was pretty high. On AWS instance this architecture resulted in an Out-of-Memory error, the introduction of cropping layer reduced the memory requirement drastically. The cropping layer took off 25 pixels from the bottom and 75 pixels from top to retain only the relevant portion of the image. The model has another pre-processing Lambda layer which means normalizes each color channel. A detailed model architecture is shown below. Each Convolution layer is followed by a RELU activation function.
 
-#### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
+____________________________________________________________________________________________________
+Layer (type)                     Output Shape          Param #     Connected to
+====================================================================================================
+cropping2d_1 (Cropping2D)        (None, 70, 320, 3)    0           cropping2d_input_1[0][0]
+____________________________________________________________________________________________________
+lambda_1 (Lambda)                (None, 70, 320, 3)    0           cropping2d_1[0][0]
+____________________________________________________________________________________________________
+convolution2d_1 (Convolution2D)  (None, 33, 158, 24)   1824        lambda_1[0][0]
+____________________________________________________________________________________________________
+activation_1 (Activation)        (None, 33, 158, 24)   0           convolution2d_1[0][0]
+____________________________________________________________________________________________________
+convolution2d_2 (Convolution2D)  (None, 15, 77, 36)    21636       activation_1[0][0]
+____________________________________________________________________________________________________
+activation_2 (Activation)        (None, 15, 77, 36)    0           convolution2d_2[0][0]
+____________________________________________________________________________________________________
+convolution2d_3 (Convolution2D)  (None, 6, 37, 48)     43248       activation_2[0][0]
+____________________________________________________________________________________________________
+activation_3 (Activation)        (None, 6, 37, 48)     0           convolution2d_3[0][0]
+____________________________________________________________________________________________________
+convolution2d_4 (Convolution2D)  (None, 4, 35, 64)     27712       activation_3[0][0]
+____________________________________________________________________________________________________
+activation_4 (Activation)        (None, 4, 35, 64)     0           convolution2d_4[0][0]
+____________________________________________________________________________________________________
+convolution2d_5 (Convolution2D)  (None, 2, 33, 72)     41544       activation_4[0][0]
+____________________________________________________________________________________________________
+activation_5 (Activation)        (None, 2, 33, 72)     0           convolution2d_5[0][0]
+____________________________________________________________________________________________________
+flatten_1 (Flatten)              (None, 4752)          0           activation_5[0][0]
+____________________________________________________________________________________________________
+dense_1 (Dense)                  (None, 1164)          5532492     flatten_1[0][0]
+____________________________________________________________________________________________________
+dropout_1 (Dropout)              (None, 1164)          0           dense_1[0][0]
+____________________________________________________________________________________________________
+dense_2 (Dense)                  (None, 100)           116500      dropout_1[0][0]
+____________________________________________________________________________________________________
+dropout_2 (Dropout)              (None, 100)           0           dense_2[0][0]
+____________________________________________________________________________________________________
+dense_3 (Dense)                  (None, 50)            5050        dropout_2[0][0]
+____________________________________________________________________________________________________
+dropout_3 (Dropout)              (None, 50)            0           dense_3[0][0]
+____________________________________________________________________________________________________
+dense_4 (Dense)                  (None, 20)            1020        dropout_3[0][0]
+____________________________________________________________________________________________________
+dropout_4 (Dropout)              (None, 20)            0           dense_4[0][0]
+____________________________________________________________________________________________________
+dense_5 (Dense)                  (None, 1)             21          dropout_4[0][0]
+====================================================================================================
 
-My project includes the following files:
-* model.py containing the script to create and train the model
-* drive.py for driving the car in autonomous mode
-* model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
+Following is the output of cropping image from Keras.
+![alt text][image6]
 
-#### 2. Submission includes functional code
-Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
-```sh
-python drive.py model.h5
-```
+#### 2. Appropriate training data
+With the first round of data collection, the car was driven very smoothly around the track once and the model was trained without any augmentation using just the center camera image. It was observed that the car primarily wanted to go straight and was not able to recover when it went close to the edge. The car went out of bounds near the first turn. Increasing the number of epochs led to a biased behavior where the car just wanted to turn left. This indicated that it was necessary to train the car on both left turn and right turn data and also provide data showing the car how to come back to center.
 
-#### 3. Submission code is usable and readable
-
-The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
-
-### Model Architecture and Training Strategy
-
-#### 1. An appropriate model architecture has been employed
-
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
-
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
-
-#### 2. Attempts to reduce overfitting in the model
-
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
-
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
-
-#### 3. Model parameter tuning
-
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
-
-#### 4. Appropriate training data
-
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
-
-For details about how I created the training data, see the next section. 
-
-### Model Architecture and Training Strategy
-
-#### 1. Solution Design Approach
-
-The overall strategy for deriving a model architecture was to ...
-
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
-
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
-
-To combat the overfitting, I modified the model so that ...
-
-Then I ... 
-
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
-
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
-
-#### 2. Final Model Architecture
-
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
-
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
-
-![alt text][image1]
-
-#### 3. Creation of the Training Set & Training Process
-
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
-
-![alt text][image2]
-
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+It is seen in the leftmost subfigure below that the recorded dataset has an inherent bias towards negative steering angle. This is the artifact of the track because the majority of turns in the loop are left turns. To augment the training data left and right camera images are also added to the training dataset. When a left image is added steering angle is adjusted by adding 0.2 to recorded steering angle, on the other hand when right camera image is used steering angle is adjusted by subtracting 0.2. The distribution of such a augmentation is shown in the center subfigure below. It still has a bias towards the negative steering angles. To remove this bias all (left-center-right camera) images were flipped horizontally and there steering angle were multiplied by -1. Training the model with this data could easily drive the car around the first major turn but as soon as it reached the turn following the bridge, it was unable to follow the turn and went into the muddy patch. Following this, I increased the significant steering data by repeating all the images whose steering angle is greater than 0.15 or less than -0.15. A random brightness adjustment was added to the repeated figure to avoid redundancy in data. The histogram plotted on the rightmost subfigure shows the distribution of steering angle. It can be seen that the user data set has no bias and has rich data of steering angles.
 
 ![alt text][image3]
+
+Following is an example of horizontal flipping of image.
 ![alt text][image4]
+
+Following is an example of adjusting the brightness of repeated image.
 ![alt text][image5]
 
-Then I repeated this process on track two in order to get more data points.
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
-
-![alt text][image6]
+### Autonomous Driving
+The model trained using above approach was tested on the track and it was seen that the car successfully completed one lap around the track.
 ![alt text][image7]
-
-Etc ....
-
-After the collection process, I had X number of data points. I then preprocessed this data by ...
-
-
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
-
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
