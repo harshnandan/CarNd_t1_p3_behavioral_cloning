@@ -62,7 +62,7 @@ Following is an example of horizontal flipping of image.
 
 ![alt text][image4]
 
-Following is an example of adjusting the brightness of repeated image.
+Following is an example of adjusting the brightness of the repeated image.
 
 ![alt text][image5]
 
