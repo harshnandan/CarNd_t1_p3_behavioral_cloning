@@ -29,7 +29,7 @@ The goals/steps of this project are the following:
 [image5]: ./img/brightness_adjusted.png "Random adjustments to brightness"
 [image6]: ./img/keras_cropped_image.png "Image cropping using Keras"
 [image7]: ./img/autonomousDriving.gif "Autonomous Driving"
-[image8]: ./img/autonomousDriving.gif "CNN architecture"
+[image8]: ./img/CNN_architecture.jpg "CNN architecture"
 
 ## Approach
 ### Data Collection
